@@ -132,3 +132,173 @@ This is the central idea of the course:
 - `feature_list.json` is not busywork; it is a control surface.
 - `init.sh` is not convenience; it is a restart contract.
 - `AGENTS.md` is not documentation for humans only; it is runtime structure for the agent.
+
+## Project 02: Agent-Readable Workspace
+
+### What this project is really teaching
+
+Project 02 shifts the focus from single-session reliability to multi-session continuity.
+
+Project 01 proved that explicit rules improve execution quality. Project 02 asks a different question:
+
+> When a new agent session starts tomorrow, can it understand the repo quickly enough to continue real work instead of rediscovering everything?
+
+This project teaches that continuity must live in the repository, not only in chat history.
+
+### What problem Project 02 solves
+
+In real development, work is often interrupted:
+
+- a session ends before the feature is done
+- a different agent instance resumes the task
+- the previous conversation context is no longer available
+
+Without repository-level continuity artifacts, the new session must re-derive:
+
+- what the project is
+- how the architecture works
+- what features are in scope
+- what was already completed
+- what the next step should be
+
+That re-discovery cost is the real target of Project 02.
+
+### The new idea: repository as the system of record
+
+Project 02 introduces a stronger form of harness design:
+
+- important execution context should be written into the repo
+- the repo should explain itself to a fresh agent session
+- progress should not depend on remembering a past conversation
+
+This is why the project emphasizes agent-readable workspace artifacts rather than only better instructions.
+
+### Why information layering matters
+
+Project 02 does not simply add more files. Its key change is that information is split by purpose instead of being dumped into one giant explanation file.
+
+If everything lives in one large document, two things happen:
+
+1. The agent must scan the whole document on every startup, which is expensive and easy to miss.
+2. Stable information and rapidly changing information get mixed together, which makes updates noisy and confusing.
+
+Project 02 solves that by separating concerns:
+
+- `AGENTS.md` for startup rules and working constraints
+- `docs/ARCHITECTURE.md` for long-lived structure and data flow
+- `docs/PRODUCT.md` for feature scope and intended user behavior
+- `feature_list.json` for current feature state
+- `session-handoff.md` for immediate session-to-session continuity
+
+Clear naming helps the agent find information. Layered content helps the agent actually use it.
+
+### What Project 02 adds to the product
+
+The product itself gains three new features:
+
+- document import
+- document detail view
+- basic persistence across restarts
+
+In `feature_list.json`, these appear as:
+
+- `document-import`
+- `document-detail`
+- `basic-persistence`
+
+This means Project 02 is not just a documentation exercise. The repo structure and the product both evolve together.
+
+### What each new artifact is for
+
+#### `docs/ARCHITECTURE.md`
+
+This file explains the system in agent-readable form:
+
+- Electron layer diagram
+- import flow
+- content retrieval flow
+- storage layout
+
+Its purpose is to prevent every new session from reverse-engineering the same architecture from source files.
+
+#### `docs/PRODUCT.md`
+
+This file explains user-facing behavior and scope:
+
+- which file types can be imported
+- what document detail should show
+- what persistence means in this stage
+- what constraints still exist
+
+Its purpose is to separate product intent from implementation detail.
+
+#### `session-handoff.md`
+
+This is the most important new file in Project 02.
+
+It tells the next session:
+
+- what was accomplished
+- what remains
+- what decisions were made
+- which files changed
+- whether any blockers exist
+- what should happen next
+
+Its purpose is not historical completeness. Its purpose is fast, accurate task resumption.
+
+### What a good session handoff looks like
+
+A good handoff is:
+
+- specific
+- current
+- action-oriented
+- tied to files and decisions
+- short enough to scan quickly
+
+It should answer:
+
+- What is done?
+- What is not done?
+- What should the next session do first?
+- What constraints or decisions must not be rediscovered?
+
+Example of a useful handoff:
+
+- "Implemented document import and detail view."
+- "Persistence across restart still needs verification."
+- "Added `GET_DOCUMENT_CONTENT` channel in `src/shared/types.ts` and wired it through preload and IPC handlers."
+- "Next step: verify startup reload path and update feature status if document list restores correctly."
+
+### What an ineffective handoff looks like
+
+A bad handoff is vague, bloated, or disconnected from action.
+
+Examples of weak handoff statements:
+
+- "Worked on the app today."
+- "Made lots of progress."
+- "Some files were changed."
+- "Need to continue later."
+
+These statements do not help the next session decide what to read, what to trust, or what to do first.
+
+Another failure mode is mixing long-term documentation with session notes. For example, if an architecture document also contains yesterday's unfinished TODOs, the signal gets diluted.
+
+### Core lesson from Project 02
+
+Project 02 teaches that reliable agent work requires more than rules. It requires repository-native continuity.
+
+The main shift is:
+
+- Project 01: "How do we stop the agent from acting blindly?"
+- Project 02: "How do we stop the next session from starting blind?"
+
+### What to remember going into later projects
+
+- Chat history is not a durable project memory system.
+- Good repository documents reduce re-discovery cost.
+- Clear naming is useful, but file purpose and content separation matter more.
+- `session-handoff.md` is a restart tool, not a diary.
+- A repo becomes agent-readable when structure, scope, and recent state are all explicit.
