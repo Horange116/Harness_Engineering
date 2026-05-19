@@ -669,3 +669,302 @@ The main shift is:
 - Baseline checks verify the repo is generally healthy; they do not mean the target bug is absent.
 - Architecture rules should be executable whenever possible.
 - A good harness helps the agent diagnose problems and prevents quick fixes from breaking the system shape.
+
+## Project 05: Evaluator Loops and Role Separation
+
+### What this project is really teaching
+
+Project 05 shifts the focus from debugging to independent quality judgment.
+
+Project 04 taught the agent to use runtime evidence while fixing failures. Project 05 asks a different question:
+
+> When a feature appears to work, can the agent evaluate whether it is actually good enough without relying on the same agent that implemented it?
+
+This project teaches that implementation and evaluation should be separated when quality matters.
+
+### How Project 05 differs from Project 04
+
+Project 04 is mainly about:
+
+- reproducing runtime bugs
+- reading logs
+- enforcing architecture boundaries
+- confirming fixes through behavior
+
+Project 05 is mainly about:
+
+- separating planner, generator, and evaluator roles
+- writing acceptance criteria before implementation
+- scoring output with an evaluator rubric
+- using revision cycles to improve quality
+
+Project 04 asks "How do we fix a real failure?"
+Project 05 asks "How do we judge whether the delivered feature is good enough?"
+
+### What problem Project 05 solves
+
+If the same agent plans, implements, and reviews a feature, it tends to grade its own work too generously.
+
+Common failure modes include:
+
+- the agent implements only the visible part of the feature
+- edge cases are ignored
+- UX details are missing
+- citations, copy actions, timestamps, or empty states are skipped
+- the agent declares success because the component renders
+
+Project 05 reduces that bias by splitting responsibilities.
+
+### The three role patterns
+
+Project 05 compares three modes:
+
+- **Single role**: one agent plans, implements, and self-reviews
+- **Generator + evaluator**: one agent implements, another reviews against a rubric
+- **Planner + generator + evaluator**: one agent defines scope, one implements, one evaluates
+
+The purpose is not to add roles for ceremony. The purpose is to measure whether role separation improves quality.
+
+### What the sprint contract does
+
+The `sprint-contract.md` defines the work before implementation starts.
+
+It records:
+
+- feature scope
+- out-of-scope items
+- role responsibilities
+- acceptance criteria
+- verification plan
+- revision log
+
+Its main job is to prevent the generator from inventing the target while coding.
+
+For Project 05, the feature is `ConversationHistory`, and the contract covers:
+
+- chat bubble layout
+- timestamps and date separators
+- expandable citations
+- copy-to-clipboard
+- follow-up suggestions
+- empty state
+- long text handling
+
+### What the evaluator rubric does
+
+The `evaluator-rubric.md` turns review into a repeatable process.
+
+Instead of asking whether the result "looks good," it scores concrete dimensions:
+
+- functional completeness
+- visual design
+- timestamps
+- citation display
+- interactivity
+- edge cases
+- accessibility
+- code quality
+
+This makes review less dependent on mood or vague judgment.
+
+### Why planner + generator + evaluator performs best
+
+The planner improves quality before code is written. The evaluator improves quality after code is written.
+
+Without a planner, the evaluator can still catch defects, but the generator may already have built around an incomplete target.
+
+With a planner, the generator starts from clear acceptance criteria, so fewer important behaviors are missed.
+
+The Project 05 comparison shows this quality progression:
+
+- single role: lowest quality, many missing behaviors
+- generator + evaluator: better, because defects are caught after implementation
+- planner + generator + evaluator: best, because scope is defined before implementation and reviewed after implementation
+
+### What revision evidence proves
+
+Revision evidence records how evaluation changed the output.
+
+It should show:
+
+- initial score
+- issues found by evaluator
+- changes made by generator
+- new score after revision
+- remaining risks or accepted tradeoffs
+
+This matters because the harness should not only claim that review happened. It should preserve evidence that review improved the result.
+
+### Core lesson from Project 05
+
+Project 05 teaches that quality review is a separate job from implementation.
+
+The main shift is:
+
+- Project 04: "Can the agent diagnose and fix a runtime failure?"
+- Project 05: "Can the system produce independent, repeatable quality judgment?"
+
+### What to remember going into later projects
+
+- Self-review is usually weaker than independent evaluation.
+- A sprint contract defines the target before implementation begins.
+- An evaluator rubric makes review repeatable and comparable.
+- Revision evidence is proof that evaluation affected the result.
+- Role separation is useful when feature quality matters more than raw speed.
+
+## Project 06: Capstone Harness Evaluation
+
+### What this project is really teaching
+
+Project 06 shifts the focus from building harness components to evaluating the harness as a whole.
+
+Projects 01-05 each introduced a specific mechanism. Project 06 asks:
+
+> Does the complete harness actually make the agent workflow more reliable, maintainable, and measurable?
+
+This project teaches that harness engineering should be evaluated, not trusted by default.
+
+### How Project 06 differs from Project 05
+
+Project 05 is mainly about:
+
+- quality review for one feature
+- role separation
+- rubric-based evaluation
+- revision cycles
+
+Project 06 is mainly about:
+
+- full workflow benchmarking
+- quality document snapshots
+- cleanup and rerun loops
+- harness simplification experiments
+
+Project 05 asks "Was this feature reviewed well?"
+Project 06 asks "Does this whole agent working environment hold up over time?"
+
+### What Project 06 combines
+
+Project 06 combines the core mechanisms from the earlier projects:
+
+- startup rules and standard initialization
+- agent-readable architecture and product docs
+- feature tracking
+- session handoff
+- one-feature-at-a-time discipline
+- runtime logging
+- architecture checks
+- evaluator rubric
+- clean-state checklist
+- benchmark scripts
+- cleanup scanner
+- quality document
+
+It is the first project where the harness itself becomes the object being measured.
+
+### What the benchmark does
+
+The benchmark fixes a task suite before the run starts.
+
+The required task slice includes:
+
+- importing documents
+- building or refreshing an index
+- asking a cited question
+- checking runtime logs
+- restarting while preserving state
+
+In the solution, `scripts/benchmark.sh` simulates the core product path:
+
+- import benchmark
+- indexing benchmark
+- query benchmark
+- data integrity verification
+
+The purpose is repeatability. The same tasks are run against weak harness, strong harness, and cleaned-up strong harness states.
+
+### What the quality document does
+
+The `quality-document.md` is a quality ledger.
+
+It scores dimensions such as:
+
+- build and compile
+- feature completeness
+- structured logging
+- Q&A with citations
+- import
+- indexing
+- persistence
+- feedback collection
+- benchmarking
+- cleanup scanner
+- harness quality
+
+The key idea is to keep snapshots:
+
+- baseline quality
+- strong harness quality
+- post-cleanup quality
+
+This turns "it feels better" into a written quality comparison.
+
+### What the cleanup scanner does
+
+The cleanup scanner checks whether the application data is internally consistent.
+
+It looks for problems such as:
+
+- content files without metadata
+- chunk files without index entries
+- metadata pointing to missing content files
+- indexed documents without chunks
+- Q&A history referencing deleted documents
+
+This matters because long-running agent work can leave hidden state inconsistencies even when the UI still appears to work.
+
+### What the cleanup and rerun loop proves
+
+The cleanup loop is important because it tests maintainability, not just initial success.
+
+The sequence is:
+
+1. Run the benchmark.
+2. Clean dead code, stale files, unclear docs, or inconsistent data.
+3. Rerun the same benchmark.
+4. Compare quality scores again.
+
+If the project cannot be cleaned and rerun reliably, the harness is not strong enough for long-term work.
+
+### What the harness simplification experiment does
+
+Project 06 also asks whether every harness component is worth keeping.
+
+The experiment is:
+
+1. Remove one harness component.
+2. Rerun the same benchmark task set.
+3. Compare the result.
+
+If results do not degrade, the component may be unnecessary overhead.
+If results degrade, the component is load-bearing and should stay.
+
+This prevents the course from turning into "add more process forever." A mature harness should be useful, not merely large.
+
+### Core lesson from Project 06
+
+Project 06 teaches that a complete harness must be measurable.
+
+The main shift is:
+
+- Project 05: "Can we evaluate feature quality independently?"
+- Project 06: "Can we evaluate the harness itself across repeated work cycles?"
+
+### What to remember after the course
+
+- A complete harness is a working system, not a pile of Markdown files.
+- Benchmark tasks must be fixed before the run begins.
+- Quality should be recorded in snapshots, not reconstructed from memory.
+- Cleanup and rerun are part of proving maintainability.
+- Harness components should be tested for value; unnecessary components should be removed.
+- The goal is a workflow that is reliable, restartable, observable, reviewable, and simple enough to keep using.
