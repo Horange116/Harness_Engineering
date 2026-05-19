@@ -302,3 +302,176 @@ The main shift is:
 - Clear naming is useful, but file purpose and content separation matter more.
 - `session-handoff.md` is a restart tool, not a diary.
 - A repo becomes agent-readable when structure, scope, and recent state are all explicit.
+
+## Project 03: Scope Control and Grounded Verification
+
+### What this project is really teaching
+
+Project 03 shifts the focus from continuity to delivery discipline.
+
+Project 02 solved the problem of resuming work in a fresh session. Project 03 asks a new question:
+
+> After the agent successfully resumes work, can it stay within scope and prove that each feature is actually complete?
+
+This project teaches that continuity alone is not enough. An agent can resume correctly and still overreach, under-finish, or declare victory too early.
+
+### How Project 03 differs from Project 02
+
+The simplest distinction is:
+
+- Project 02: help the next session find the road
+- Project 03: stop the next session from driving off the road
+
+Project 02 is mainly about:
+
+- repository readability
+- information layering
+- session continuity
+- faster context recovery
+
+Project 03 is mainly about:
+
+- one-feature-at-a-time execution
+- explicit feature dependencies
+- fail-to-pass state transitions
+- verification evidence before completion claims
+
+Project 02 answers "Where do I continue?"
+Project 03 answers "What exactly am I allowed to do next, and how do I prove it worked?"
+
+### What problem Project 03 solves
+
+Once features become more complex, the most common failure modes change:
+
+- the agent implements multiple features in one pass
+- the agent edits unrelated areas while chasing a task
+- the agent claims a feature is done because code exists
+- the feature appears present but is not truly verified end-to-end
+
+Project 03 introduces execution discipline to reduce those failures.
+
+### What Project 03 adds to the product
+
+The product gains four new capabilities:
+
+- metadata extraction
+- document chunking
+- indexing status UI
+- grounded Q&A with citations
+
+In `feature_list.json`, these appear as:
+
+- `metadata-extraction`
+- `document-chunking`
+- `indexing-status-ui`
+- `grounded-qa`
+
+These features are more interdependent than the earlier projects, which is why explicit dependency management becomes important.
+
+### The one-feature-at-a-time rule
+
+The core rule in Project 03 is simple:
+
+1. Pick one feature from `feature_list.json`
+2. Implement only that feature
+3. Verify it
+4. Update the feature state with evidence
+5. Only then move to the next feature
+
+This rule is not about moving slowly. It is about reducing regression risk and fake completion.
+
+Without this rule, complex tasks often turn into broad, partially finished changes that are hard to verify and hard to resume.
+
+### Why `feature_list.json` becomes more important here
+
+In Project 01, `feature_list.json` mainly narrowed scope.
+In Project 02, it helped preserve current feature state across sessions.
+In Project 03, it becomes a true control surface.
+
+Its role is now to define:
+
+- what can be worked on next
+- which features depend on others
+- whether a feature is still effectively failing
+- what evidence is required before it can be treated as passing
+
+The key idea is:
+
+> A feature is not done because the agent says it is done.
+> A feature is done when it moves from failing to passing with evidence.
+
+### Why feature dependencies matter
+
+Project 03 explicitly documents dependencies such as:
+
+- `metadata-extraction -> document-chunking`
+- `document-chunking -> indexing-status-ui`
+- `document-chunking -> grounded-qa`
+
+This matters because the agent should not choose implementation order based only on what sounds easy or visible in the UI.
+
+A feature list is stronger when it encodes not just tasks, but the correct order of execution.
+
+### What counts as real verification
+
+Project 03 raises the verification bar.
+
+It is no longer enough to check that:
+
+- code compiles
+- the app launches
+- some output appears
+
+Verification must be tied to feature semantics.
+
+For example, grounded Q&A is not verified just because an answer string is returned. It must also be checked for:
+
+- the presence of citations
+- whether citations point to real document chunks
+- whether those citations are relevant to the answer
+
+This is an important transition in the course: moving from build verification to behavior verification.
+
+### What `clean-state-checklist.md` adds
+
+Project 03 introduces a final structured verification layer through `clean-state-checklist.md`.
+
+This checklist does not only ask whether features exist. It asks whether the repository is in a clean, restartable, reviewable state across:
+
+- build verification
+- feature verification
+- scope-control verification
+- code quality
+- documentation completeness
+
+This prevents a common failure mode where each individual feature appears done, but the overall repository is still messy or unsafe to hand off.
+
+### What `claude-progress.md` becomes here
+
+In Project 03, progress tracking becomes more feature-oriented.
+
+Instead of simply logging that "work happened today," the progress file records:
+
+- which feature was worked on
+- what was changed
+- how it was verified
+- when the feature was promoted to `pass`
+
+This makes the progress log useful as evidence of how a feature moved through the harness, not just as a diary.
+
+### Core lesson from Project 03
+
+Project 03 teaches that a reliable harness must control not only context recovery, but also execution boundaries and completion criteria.
+
+The main shift is:
+
+- Project 02: "Can the new session resume work efficiently?"
+- Project 03: "Can the resumed session avoid scope drift and prove completion?"
+
+### What to remember going into later projects
+
+- Session continuity does not guarantee delivery accuracy.
+- A feature list is more powerful when it controls order, state, and evidence.
+- One-feature-at-a-time is a safety mechanism, not just a project management preference.
+- Verification should test the real behavior of the feature, not only whether code exists.
+- Clean handoff requires both recent context and a genuinely clean repository state.
