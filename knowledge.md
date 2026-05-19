@@ -475,3 +475,197 @@ The main shift is:
 - One-feature-at-a-time is a safety mechanism, not just a project management preference.
 - Verification should test the real behavior of the feature, not only whether code exists.
 - Clean handoff requires both recent context and a genuinely clean repository state.
+
+## Project 04: Runtime Observability and Structural Control
+
+### What this project is really teaching
+
+Project 04 shifts the focus from delivery discipline to debugging discipline.
+
+Project 03 taught the agent to work one feature at a time and prove completion. Project 04 asks a different question:
+
+> When the program runs but behaves incorrectly, can the agent use runtime evidence to diagnose the problem instead of guessing?
+
+This project teaches that a harness should help the agent debug, not only implement.
+
+### How Project 04 differs from Project 03
+
+Project 03 is mainly about:
+
+- controlling scope
+- proving feature completion
+- preventing fake pass states
+
+Project 04 is mainly about:
+
+- exposing runtime signals
+- reproducing the target bug
+- using logs to narrow the failure location
+- enforcing architecture boundaries while fixing bugs
+
+Project 03 teaches the agent not to overreach.
+Project 04 teaches the agent not to guess while debugging.
+
+### What problem Project 04 solves
+
+Even with good scope control, a runtime bug can still be difficult to fix.
+
+For example, if Q&A returns no useful answer, the failure could be in:
+
+- document import
+- document chunking
+- index persistence
+- IPC wiring
+- retrieval scoring
+- renderer display
+
+Without logs, the agent may read code and guess. That often leads to shallow fixes or changes in the wrong layer.
+
+Project 04 adds runtime observability so the system reports useful evidence while it runs.
+
+### Why the program must be run and the bug reproduced
+
+Running the program is necessary because Project 04 is about runtime behavior, not only static code structure.
+
+Reproducing the bug turns a vague report into evidence:
+
+- how large the imported content was
+- how many chunks were produced
+- whether any chunks were empty
+- how many citations Q&A found
+- what confidence score was returned
+- which service logged the failure
+
+This matters because the target bug can exist even when the project still builds and type-checks.
+
+The purpose of reproduction is to move from "I think the issue is here" to "the runtime evidence points here."
+
+### What "baseline is not broken" means
+
+Before fixing the target bug, the agent should confirm the project baseline is healthy.
+
+This does not mean the target bug is gone. The target bug is expected to exist.
+
+It means the basic project path still works:
+
+- dependencies install
+- type checking passes
+- build passes
+- the app can start
+- architecture checks pass
+
+Baseline verification answers:
+
+> Is the repo stable enough that we can trust failures from the target scenario?
+
+Target bug reproduction answers:
+
+> Can we observe the specific behavior we are trying to fix?
+
+These are different checks. A project can have a healthy baseline and still contain the runtime bug being fixed.
+
+### When logs are written
+
+Logs should be written at important runtime boundaries, not only when an error occurs.
+
+Useful log points include:
+
+- application startup
+- service initialization
+- IPC invocation
+- document import
+- indexing and chunk creation
+- Q&A execution
+- caught exceptions and user-visible failures
+
+Good logs cover both the normal path and the failure path. If only failures are logged, the agent cannot compare expected flow with actual flow.
+
+### Where logs are written
+
+Logs are written in the running code, mainly around the layers that own runtime behavior:
+
+- `src/main/` for startup and IPC registration
+- `src/services/` for import, indexing, persistence, and Q&A logic
+- `src/renderer/` only when the user-facing error state matters
+
+In Project 04, service logs are structured so each event can include:
+
+- timestamp
+- level
+- service name
+- message
+- relevant runtime fields such as content length, chunk count, citation count, or confidence
+
+The log output is then read from the terminal or application console while the app is running.
+
+### What structural checks do
+
+Runtime logs help the agent locate a bug. Structural checks stop the agent from fixing it in the wrong architectural layer.
+
+Project 04 uses `scripts/check-architecture.sh` to enforce boundaries such as:
+
+- renderer code must not import Node.js core modules like `fs` or `path`
+- services must not import Electron IPC APIs
+- services and main process code must not import React
+
+This turns architecture guidance into an executable guardrail.
+
+### When checks are run
+
+There are two different kinds of checks.
+
+Baseline and structural checks are run:
+
+- before starting new work
+- after a fix
+- before committing
+- at the end of a session
+
+Runtime behavior checks are run:
+
+- while reproducing the bug
+- after changing code
+- during final clean-state verification
+
+A typical Project 04 debugging flow is:
+
+1. Run baseline checks.
+2. Run the app and reproduce the target bug.
+3. Read logs to locate the failing stage.
+4. Change the smallest relevant code path.
+5. Run architecture checks.
+6. Re-run the target scenario.
+7. Finish with the clean-state checklist.
+
+### What `clean-state-checklist.md` adds here
+
+In Project 04, the clean-state checklist becomes more runtime-focused.
+
+It verifies not only that the app builds, but that:
+
+- structured logs appear at startup
+- import events are visible in logs
+- indexing works for different document sizes
+- no empty chunks are produced
+- Q&A returns citations
+- architecture checks pass
+- repo status has no unintended files staged
+
+This turns "the bug seems fixed" into a broader repository health check.
+
+### Core lesson from Project 04
+
+Project 04 teaches that debugging should be evidence-driven.
+
+The main shift is:
+
+- Project 03: "Can the agent prove a feature is complete?"
+- Project 04: "Can the agent use runtime evidence to find and fix a real failure?"
+
+### What to remember going into later projects
+
+- Logs are harness inputs, not just developer convenience.
+- Reproducing the bug is how debugging moves from guesswork to evidence.
+- Baseline checks verify the repo is generally healthy; they do not mean the target bug is absent.
+- Architecture rules should be executable whenever possible.
+- A good harness helps the agent diagnose problems and prevents quick fixes from breaking the system shape.
